@@ -8,6 +8,8 @@
 
 ## Abstract
 
+Our approach uses fragment screening techniques to identify the best fragments that are then concatenated into lead-like compounds. This allows us to significantly reduce the computational resources while performing a more comprehensive screen due to the smaller conformational space of fragments as compared to whole compounds
+
 ## Prerequisites
 [RDKit](https://www.rdkit.org)
 ```
@@ -32,6 +34,11 @@ tar xf molfile2params.tar.gz -C <combichem directory>
 ```
 
 ## Navigating the Repository
+
+- `Example` contains example input file to present how works each step of the approach
+- `Utils` service script to support IO, search and structural manipulation with molecular structures
+- `Alignment.py`, `Conformers.py`, `Merging.py`, `Params.py`, `Reactor.py`, `Screening.py` are separate steps of protocol
+- `FragmentsMerging.py` and `FragmentsScreening.py` - multistep-protocols for fragments prioritization and merging to lead-like compounds
 
 ## Input files for fragments screening
 
