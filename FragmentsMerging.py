@@ -15,19 +15,19 @@ def alignment(ref, targ, output):
 
 def merging(r1, r2, core, output):
 
-    cmd = f"python /fccc/users/karanicolaslab/andriag/combichem/combichem/processing/Merging.py -ref_pose {r1} -target_pose {r2} -substructure {core} -output {output}"
+    cmd = f"python Merging.py -ref_pose {r1} -target_pose {r2} -substructure {core} -output {output}"
     os.system(cmd)
 
 def generate_params(sdf, output):
 
     cmd = f"convert.py {sdf} {output}.mol2"
     os.system(cmd)
-    cmd = f"python /fccc/users/karanicolaslab/andriag/combichem/combichem/external_apps/generic_potencial/mol2genparams.py -s {output}.mol2 --prefix={output}"
+    cmd = f"python external_apps/generic_potencial/mol2genparams.py -s {output}.mol2 --prefix={output}"
     os.system(cmd)
 
 def replace_charge(r_pdb, r_params, t_pdb, t_params, output):
 
-    cmd = f"python /fccc/users/karanicolaslab/andriag/combichem/combichem/processing/Params.py -ref_pdb {r_pdb} -ref_params {r_params} -target_pdb {t_pdb} -target_params {t_params} -out {output}"
+    cmd = f"python Params.py -ref_pdb {r_pdb} -ref_params {r_params} -target_pdb {t_pdb} -target_params {t_params} -out {output}"
     os.system(cmd)
 
 
@@ -39,7 +39,7 @@ def minimization(ligand, protein, params, hinge):
 
     mini_complexx = f"minimizations/mini_{complexx.split('/')[-1]}"
     mini_log = f"minimizations/mini_{complexx.split('/')[-1].split('.')[0]}.log"
-    cmd = f"python /fccc/users/karanicolaslab/andriag/combichem/combichem/processing/Screening.py -pdb {complexx} -params {params} -output {mini_complexx} -residues {hinge} > {mini_log}"
+    cmd = f"python Screening.py -pdb {complexx} -params {params} -output {mini_complexx} -residues {hinge} > {mini_log}"
 
     os.system(cmd)
 
