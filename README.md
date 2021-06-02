@@ -52,7 +52,7 @@ export OEOMEGA=<path-to-omega2>            # (not required if you prefer to use 
 
 ## Fragments screening
 
-For simplicity of fragments virtual screening, we have implemented protocol containing separate manipulation with fragments structure. The script takes fragments in SMILES format, substructure (hinge-binding core in the paper), its `pdb` and `params` files, protein structure in `PDB` format, and 85-residue sequence from [KLIFS](https://klifs.net/) for given kinase.
+For simplicity of fragments virtual screening, we have implemented protocol containing separate manipulation with fragments structure. The script takes fragments in SMILES format, substructure (hinge-binding core in the paper), its `pdb` and `params` files, protein structure in `PDB` format, and 85-residue sequence from [KLIFS](https://klifs.net/) for given kinase and returns minimized conformers of fragments in complex with target protein.
 
 ```
 python FragmentsScreening.py -smi examples/FragmentsScreening/R1.smi \
