@@ -1,7 +1,7 @@
 import argparse
 import os, sys, glob
 
-def make_dirs(prefix=""):
+def make_dirs(prefix):
 
     if prefix != "":
         prefix += "_"
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     for sdf in glob.glob(f"{output_prefix}/*sdf"):
         filename = sdf.split("/")[-1].split(".")[0]
 
-        # oechem am1bcc charge assignment
+        # charge assignment
         input_sdf = sdf
         output_mol2 = f"{mol2_dir}/{filename}.mol2"
         cmd_am1bcc_charge(input_sdf, output_mol2)

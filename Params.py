@@ -37,6 +37,7 @@ def replace_charge(ref_pdb, ref_params, target_pdb, target_params):
     Returns:
         str: Params files with updated options
     """
+
     reference = io.read_pdb(ref_pdb, params=ref_params)
     target = io.read_pdb(target_pdb, params=target_params)
 

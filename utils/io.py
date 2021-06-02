@@ -273,6 +273,9 @@ def read_sdf(filename, add_hs=True, remove_hs=False):
 
     mols = [mol for mol in mols]
 
+    if remove_hs:
+        mols = [remove_hydrogens(mol) for mol in mols]    
+
     if add_hs:
         for i, mol in enumerate(mols):
             Chem.SanitizeMol(mol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_ALL ^
