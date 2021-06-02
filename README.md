@@ -32,6 +32,16 @@ pip install <PyRosettaDistro>.tar.bz2
 wget http://graylab.jhu.edu/pyrosetta/downloads/scripts/toolbox/molfile2params.tar.gz
 tar xf molfile2params.tar.gz -C <combichem directory>
 ```
+[Omega2](https://www.eyesopen.com/omega), if you prefer OpenEye tools to generate conformers
+
+After installation you need to add `environment variables` for tools and scripts into your shell initializing file (e.g. `~/.bashrc`):
+```
+export OECHARGE=<path-to-assigncharges.py> # you can select only OECHARGE (paid commercial tool) or
+export OBABEL=<path-to-obabel>             # OBABEL(free open source)
+
+export OEOMEGA=<path-to-omega2>            # (not required if you prefer to use RDKit 
+                                           # conformers generator)
+```
 
 ## Navigating the Repository
 
@@ -40,13 +50,22 @@ tar xf molfile2params.tar.gz -C <combichem directory>
 - `Alignment.py`, `Conformers.py`, `Merging.py`, `Params.py`, `Reactor.py`, `Screening.py` are separate steps of protocol
 - `FragmentsMerging.py` and `FragmentsScreening.py` - multistep-protocols for fragments prioritization and merging to lead-like compounds
 
-## Input files for fragments screening
+## Fragments screening
+
+For simplicity of fragments virtual screening, we have implemented protocol containing separate manipulation with fragments structure. The script takes fragments in SMILES format, substructure (hinge-binding core in the paper), its `pdb` and `params` files, protein structure in `PDB` format, and 85-residue sequence from [KLIFS](https://klifs.net/) for given kinase.
+
+```
+python FragmentsScreening.py -smi examples/FragmentsScreening/R1.smi \
+                             -substructure examples/FragmentsScreening/ref.sdf \
+                             -ref_pdb examples/FragmentsScreening/ref.pdb \
+                             -ref_param examples/FragmentsScreening/ref.params \
+                             -protein examples/FragmentsScreening/CDK9.pdb \
+                             -klifs_seq 23 24 25 26 27 28 29 30 31 32 33 34 35 45 46 47 48 49 50 62 63 64 65 66 67 68 69 70 71 72 73 74 76 77 78 79 80 81 82 83 84 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 165 166 167 168 169 170 171
+```
 
 ## Input files for fragments merging
 
 ## Example commands
-
-
 
 ```
 python Reactor.py -reactants <R1> <RN> -reaction <SMARTS_template> -out <SMILESOutput>
