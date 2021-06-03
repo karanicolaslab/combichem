@@ -10,6 +10,8 @@
 
 Our approach uses fragment screening techniques to identify the best fragments that are then concatenated into lead-like compounds. This allows us to significantly reduce the computational resources while performing a more comprehensive screen due to the smaller conformational space of fragments as compared to whole compounds
 
+Comprehensive description of the approach can be find in [our paper](https://doi.org/10.1101/2021.06.01.446684)
+
 ## Prerequisites
 [RDKit](https://www.rdkit.org)
 ```
