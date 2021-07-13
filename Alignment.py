@@ -73,7 +73,7 @@ def main():
 
     for i, pose in enumerate(target_pose):
         target_pose_aligned = align(pose, ref_pose, substructure_pose)[0]
-        write_sdf(target_pose_aligned, out_name, status="a")
+        write_sdf(target_pose_aligned, out_name, status="w")
 
 if __name__ == "__main__":
     main()
