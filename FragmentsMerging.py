@@ -36,7 +36,7 @@ def args():
     parser.add_argument("-target_params", nargs="+", required=True)
     parser.add_argument("-substructure", required=True)
     parser.add_argument("-klifs_seq", nargs="+", required=True)
-    
+
     args = parser.parse_args()
 
     return args
@@ -54,7 +54,7 @@ def alignment(ref, targ, substructure, output):
 
 def merging(ref, targets, core, output):
     p = os.path.realpath(__file__)
-    p = p[0:p.rfind("/")+1] 
+    p = p[0:p.rfind("/")+1]
 
     targets = " ".join(targets)
 
@@ -70,12 +70,12 @@ def cmd_am1bcc_charge(input_sdf, output_mol):
         raise("Please install OEChem or OpenBabel")
 
 def cmd_params(input_mol2, output_prefix):
-    os.system(f"python $MOL2GENPARAMS -s {input_mol2} --prefix={output_prefix}")        
+    os.system(f"python $MOL2GENPARAMS -s {input_mol2} --prefix={output_prefix}")
 
 
 def cmd_replace_params(ref_pdb, ref_params, input_pdb, input_params, output_params):
     p = os.path.realpath(__file__)
-    p = p[0:p.rfind("/")+1] 
+    p = p[0:p.rfind("/")+1]
     os.system(f"python {p}/Params.py -ref_pdb {ref_pdb} -ref_params {ref_params} -target_pdb {input_pdb} -target_params {input_params} -out {output_params}")
 
 def minimization(ligand, protein, params, hinge):
@@ -118,7 +118,7 @@ def extract_lig_prot(input_pdb, output_ligand_pdb, output_protein_pdb):
 
 def cmd_convert_pdb_to_sdf(input_pdb, params, output_sdf):
     p = os.path.realpath(__file__)
-    p = p[0:p.rfind("/")+1] 
+    p = p[0:p.rfind("/")+1]
 
     os.system(f"python {p}/ConvertPDBtoSDF.py -inp {input_pdb} -params {params} -out {output_sdf}")
 
@@ -129,7 +129,7 @@ def cmd_concat(protein, input_pdb, output_pdb):
 
 def cmd_minimization(input_pdb, input_params, input_klifs, output_pdb, output_log):
     p = os.path.realpath(__file__)
-    p = p[0:p.rfind("/")+1] 
+    p = p[0:p.rfind("/")+1]
 
     input_klifs = " ".join(input_klifs)
 
@@ -147,16 +147,20 @@ if __name__ == "__main__":
     replaced_params_target_dirs = dirs[6]
     complexes_dir, minimization_dir = dirs[7::]
 
+    pair_prefix = [args.ref_pdb] + args.target_pdb
+    pair_prefix = [e.split("/")[-1].split(".")[0] for e in pair_prefix]
+    pair_prefix = "_".join(pair_prefix)
+
     # extract ligand and proteins for reference
     input_pdb = args.ref_pdb
     ref_filename = input_pdb.split("/")[-1].split(".")[0].split("__")[0].split("mini_")[-1]
-    output_ligand_pdb = f"{refs_dir}/{ref_filename}_lig.pdb"
-    output_protein_pdb = f"{refs_dir}/{ref_filename}_prot.pdb"
+    output_ligand_pdb = f"{refs_dir}/{pair_prefix}_lig.pdb"
+    output_protein_pdb = f"{refs_dir}/{pair_prefix}_prot.pdb"
     extract_lig_prot(input_pdb, output_ligand_pdb, output_protein_pdb)
 
     # convert ligands to sdf for reference
     input_pdb = output_ligand_pdb
-    output_sdf = f"{refs_dir}/{ref_filename}_lig.sdf"
+    output_sdf = f"{refs_dir}/{pair_prefix}_lig.sdf"
     cmd_convert_pdb_to_sdf(input_pdb, args.ref_params, output_sdf)
 
     input_target_sdfs = []
@@ -165,19 +169,19 @@ if __name__ == "__main__":
         # extract ligand and proteins for target
         input_pdb = tpdb
         filename = input_pdb.split("/")[-1].split(".")[0].split("__")[0].split("mini_")[-1]
-        output_ligand_pdb = f"{target_dirs[i]}/{filename}_lig.pdb"
-        output_protein_pdb = f"{target_dirs[i]}/{filename}_prot.pdb"
+        output_ligand_pdb = f"{target_dirs[i]}/{pair_prefix}_lig.pdb"
+        output_protein_pdb = f"{target_dirs[i]}/{pair_prefix}_prot.pdb"
         extract_lig_prot(input_pdb, output_ligand_pdb, output_protein_pdb)
 
         # convert ligands to sdf for target
         input_pdb = output_ligand_pdb
-        output_sdf = f"{target_dirs[i]}/{filename}_lig.sdf"
+        output_sdf = f"{target_dirs[i]}/{pair_prefix}_lig.sdf"
         cmd_convert_pdb_to_sdf(input_pdb, args.target_params[i], output_sdf)
 
         # align ligands to reference
-        input_ref_sdf = f"{refs_dir}/{ref_filename}_lig.sdf"
-        input_target_sdf = f"{target_dirs[i]}/{filename}_lig.sdf"
-        output_sdf = f"{alns_dirs[i]}/{filename}.sdf"
+        input_ref_sdf = f"{refs_dir}/{pair_prefix}_lig.sdf"
+        input_target_sdf = f"{target_dirs[i]}/{pair_prefix}_lig.sdf"
+        output_sdf = f"{alns_dirs[i]}/{pair_prefix}.sdf"
 
         alignment(input_ref_sdf, input_target_sdf, args.substructure, output_sdf)
         input_target_sdfs.append(input_target_sdf)
@@ -185,9 +189,8 @@ if __name__ == "__main__":
     # merging to one compound
     input_ref_sdf = input_ref_sdf
     input_ref_sdf_filename = input_ref_sdf.split("/")[-1].split("_lig")[0]
-    input_target_sdfs = [f"alns_R{i+2}/{f.split('/')[-1].split('_lig')[0]}.sdf" for i,f in enumerate(input_target_sdfs)]
-    input_target_sdfs_filename = [f.split("/")[-1].split(".")[0] for f in input_target_sdfs]
-    output_sdf = f"{merged_dir}/{input_ref_sdf_filename}_" + "_".join(input_target_sdfs_filename) + ".sdf"
+    input_target_sdfs = [f"alns_R{i+2}/{pair_prefix}.sdf" for i,f in enumerate(input_target_sdfs)]
+    output_sdf = f"{merged_dir}/{pair_prefix}.sdf"
     merging(input_ref_sdf, input_target_sdfs, args.substructure, output_sdf)
 
     # charge assignment
@@ -202,7 +205,7 @@ if __name__ == "__main__":
     cmd_params(input_mol2, output_prefix)
 
     # Replace params for reference
-    input_ref_pdb = f"{refs_dir}/{ref_filename}_lig.pdb"
+    input_ref_pdb = f"{refs_dir}/{pair_prefix}_lig.pdb"
     input_ref_params = args.ref_params
     input_pdb = f"{output_prefix}_0001.pdb"
     input_params = f"{output_prefix}.params"
@@ -211,8 +214,7 @@ if __name__ == "__main__":
 
     for i, tpdb in enumerate(args.target_pdb):
         # replace params for targets
-        filename = tpdb.split("/")[-1].split(".")[0].split("__")[0].split("mini_")[-1]
-        input_ref_pdb = f"{target_dirs[i]}/{filename}_lig.pdb"
+        input_ref_pdb = f"{target_dirs[i]}/{pair_prefix}_lig.pdb"
         input_ref_params = args.target_params[i]
 
         input_pdb = f"{output_prefix}_0001.pdb"
@@ -223,8 +225,8 @@ if __name__ == "__main__":
         cmd_replace_params(input_ref_pdb, input_ref_params, input_pdb, input_params, output_params)
 
     # concat ligand and target protein structure
-    protein = f"{refs_dir}/{ref_filename}_prot.pdb"
-    protein_name = protein.split("/")[-1].split(".")[0]
+    protein = f"{refs_dir}/{pair_prefix}_prot.pdb"
+    protein_name = protein.split("/")[-1].split("_R2")[0]
     input_pdb = f"{output_prefix}_0001.pdb"
     output_pdb = f"{complexes_dir}/{compound_filename}__{protein_name}.pdb"
     cmd_concat(protein, input_pdb, output_pdb)
@@ -236,4 +238,3 @@ if __name__ == "__main__":
     output_pdb = f"{minimization_dir}/mini_{compound_filename}__{protein_name}.pdb"
     output_log = f"{minimization_dir}/mini_{compound_filename}__{protein_name}.log"
     cmd_minimization(input_pdb, input_params, input_klifs, output_pdb, output_log)
-
