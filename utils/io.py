@@ -169,7 +169,7 @@ def read_pdb(filename, add_hs=True, remove_hs=False, proximity_bonding=False, sa
         pdb = [p for p in pdb if p.startswith("ATOM") or p.startswith("HETATM")]
         pdb = "\n".join(pdb)
     
-    mol = Chem.MolFromPDBBlock(filename, removeHs=remove_hs,
+    mol = Chem.MolFromPDBBlock(pdb, removeHs=remove_hs,
                               proximityBonding=proximity_bonding,
                               sanitize=sanitize)
 
