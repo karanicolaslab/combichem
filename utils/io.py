@@ -164,7 +164,12 @@ def solve_problem(mol):
 
 def read_pdb(filename, add_hs=True, remove_hs=False, proximity_bonding=False, sanitize=False, params=None):
 
-    mol = Chem.MolFromPDBFile(filename, removeHs=remove_hs,
+    with open(filename, "r") as pdb:
+        pdb = pdb.read().split("\n")
+        pdb = [p for p in pdb if p.startswith("ATOM") or p.startswith("HETATM")]
+        pdb = "\n".join(pdb)
+    
+    mol = Chem.MolFromPDBBlock(filename, removeHs=remove_hs,
                               proximityBonding=proximity_bonding,
                               sanitize=sanitize)
 
