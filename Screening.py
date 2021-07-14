@@ -1,3 +1,4 @@
+import argparse
 import pyrosetta
 from pyrosetta.io import pose_from_pdb
 from pyrosetta.rosetta.core.pose import Pose
@@ -12,6 +13,10 @@ from pyrosetta.rosetta.core.select.residue_selector import ResidueIndexSelector
 from pyrosetta.rosetta.protocols.toolbox.pose_manipulation import superimpose_pose_on_subset_CA
 from pyrosetta.rosetta.utility import vector1_unsigned_long
 from pyrosetta.rosetta.std import list_unsigned_long_t
+
+from pyrosetta.rosetta.protocols.grafting.simple_movers import DeleteRegionMover
+from pyrosetta.rosetta.core.select.residue_selector import ResidueNameSelector
+from pyrosetta.rosetta.core.select.residue_selector import NotResidueSelector
 
 def init(params=None, beta=True, mute=["protocols.simple_moves.SuperimposeMover",
                                        "protocols.moves.RigidBodyMover",
@@ -76,6 +81,28 @@ def get_interaction_energy(pose, scorefxn):
     difference = get_total(pose, scorefxn) - get_total(ubo_ps, scorefxn)
 
     return difference
+
+def get_interaction_energy_covalent(pose, lig_name, scorefxn):
+    lg_pose = pose.clone()
+    protein_pose = pose.clone()
+    lg1_res = ResidueNameSelector(lig_name)
+    prot_res = NotResidueSelector(lg1_res)
+
+    del_mover = DeleteRegionMover()
+
+    del_mover.set_residue_selector(lg1_res)
+    del_mover.apply(protein_pose)
+
+    del_mover.set_residue_selector(prot_res)
+    del_mover.apply(lg_pose)
+
+    total_energy = scorefxn(pose)
+    protein_energy = scorefxn(protein_pose)
+    ligand_energy = scorefxn(lg_pose)
+
+    energy = total_energy - (protein_energy + ligand_energy)
+
+    return energy
 
 
 def minimize_complex(pose,
@@ -157,7 +184,7 @@ def rmsd_score(coord1, coord2):
     return rmsd
 
 
-def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, residues=None, substructure=None):
+def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, residues=None, substructure=None, no_bou_ubo=False):
     """Summary
 
     Args:
@@ -205,7 +232,13 @@ def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, re
     print("Final score of complex: ", protein_energy)
     print("Final fa_intra_rep of ligand:", lig_score_terms)
 
-    energy = get_interaction_energy(bound_pose, scorefxn)
+    if no_bou_ubo:
+        print(1)
+        energy = get_interaction_energy_covalent(bound_pose, lig_name, scorefxn)
+    else:
+        energy = get_interaction_energy(bound_pose, scorefxn)
+        print(2)
+        
     print("Energy of bound-unbound complexes: ", energy)
 
     # printing rmsd
@@ -228,7 +261,6 @@ def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, re
 
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-pdb", help="", type=str, required=True)
@@ -236,6 +268,7 @@ def main():
     parser.add_argument("-output", help="", type=str, required=True)
     parser.add_argument("-residues", help="", nargs="+", type=int, default=None)
     parser.add_argument("-beta", help="", type=bool, default=True)
+    parser.add_argument("-no_bou_ubo", help="", action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -245,7 +278,7 @@ def main():
     residues = args.residues
 
     init(params=params)
-    screening(pdb, output, residues=residues)
+    screening(pdb, output, residues=residues, no_bou_ubo=args.no_bou_ubo)
 
 
 if __name__ == "__main__":
