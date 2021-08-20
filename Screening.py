@@ -1,6 +1,7 @@
 import argparse
 import pyrosetta
 from pyrosetta.io import pose_from_pdb
+from pyrosetta.rosetta.core.import_pose import pose_from_pdbstring
 from pyrosetta.rosetta.core.pose import Pose
 from pyrosetta.rosetta.core.kinematics import MoveMap
 from pyrosetta.rosetta.core.scoring import ScoreType, CA_rmsd
@@ -195,7 +196,8 @@ def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, re
         max_iter (int, optional): Number of iterations during minimization
     """
 
-    bound_pose = pose_from_pdb(pdb)
+#     bound_pose = pose_from_pdb(pdb)
+    bound_pose = pose_from_pdbstring(pdb)
     non_minimized_pose = bound_pose.clone()
 
     scorefxn = get_score_function()
@@ -272,7 +274,8 @@ def main():
 
     args = parser.parse_args()
 
-    pdb = args.pdb
+    with open(args.pdb) as pdb:
+        pdb = str(pdb.read())
     params = args.params
     output = args.output
     residues = args.residues
