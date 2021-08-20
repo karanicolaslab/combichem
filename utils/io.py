@@ -216,6 +216,58 @@ def read_pdb(filename, add_hs=True, remove_hs=False, proximity_bonding=False, sa
 
     return mol
 
+def read_pdb_block(pdb, add_hs=True, remove_hs=False, proximity_bonding=False, sanitize=False, params=None):
+
+    
+    mol = Chem.MolFromPDBBlock(pdb, removeHs=remove_hs,
+                              proximityBonding=proximity_bonding,
+                              sanitize=sanitize)
+
+    if remove_hs:
+        mol = remove_hydrogens(mol)
+
+    atom_names = {}
+
+    for i, atom in enumerate(mol.GetAtoms()):
+        atom_name = atom.GetPDBResidueInfo().GetName()
+        atom_names[atom_name.replace(" ","")] = i
+
+    if params is not None:
+        bonds = parse_bonds(params)
+
+        mol_editable = Chem.RWMol(mol)
+
+        for bond in bonds:
+            if bond[0] in atom_names and bond[1] in atom_names:
+                begin_atom_name = bond[0]
+                end_atom_name = bond[1]
+                bond_type = bond[2]
+
+                begin_idx = atom_names[begin_atom_name]
+                end_idx = atom_names[end_atom_name]
+
+                mol_editable.AddBond(begin_idx, end_idx, order=bond_type)
+
+        mol = mol_editable.GetMol()
+        mol = solve_problem(mol)
+
+        for i, _ in enumerate(mol.GetAtoms()):
+            mol = correct_charge(mol, i)
+        
+        # print(write_smi(mol))
+        Chem.SanitizeMol(mol)
+
+    for i, atom in enumerate(mol.GetAtoms()):
+        # print(i, mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName().strip())
+        atom.UpdatePropertyCache()
+
+    mol.SetProp("_Name", filename.split("/")[-1].split(".")[0])
+
+
+    return mol
+
+
+
 def remove_hydrogens(mol):
     """Summary
 
