@@ -26,7 +26,7 @@ def get_charges(file):
     return charges_dict
 
 
-def replace_charge(ref_pdb, ref_params, target_pdb, target_params):
+def replace_charge(reference, target):
     """Summary
 
     Args:
@@ -37,10 +37,6 @@ def replace_charge(ref_pdb, ref_params, target_pdb, target_params):
     Returns:
         str: Params files with updated options
     """
-
-    reference = io.read_pdb(ref_pdb, params=ref_params)
-    target = io.read_pdb(target_pdb, params=target_params)
-
     # print(ref_pdb, target_pdb, sep="\t", end="\t")
 
     reference_names = io.get_atoms_names(reference)
@@ -89,7 +85,10 @@ def save_file(params, out):
         f.close()
 
 def repl_charge(ref_pdb, ref_params, target_pdb, target_params, out):
-    replaced_params, num = replace_charge(ref_pdb, ref_params, target_pdb, target_params)
+    reference = io.read_pdb(ref_pdb, params=ref_params)
+    target = io.read_pdb(target_pdb, params=target_params)
+    
+    replaced_params, num = replace_charge(reference, target)
     
     if replaced_params is not None:
         save_file(replaced_params, out)
