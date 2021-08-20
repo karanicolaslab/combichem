@@ -105,6 +105,26 @@ def parse_bonds(filename):
     return bonds
 
 
+def parse_bonds_block(f):
+
+    bond_types = { "1":Chem.BondType.SINGLE,
+                   "2":Chem.BondType.DOUBLE,
+                   "3":Chem.BondType.TRIPLE,
+                   "4":Chem.BondType.AROMATIC }
+
+    bonds = []
+
+    for row in f.split("\n"):
+        if row.startswith("BOND_TYPE"):
+            row = row.replace(" RING", "")
+            row = [elem for elem in row.split(" ")[1:] if elem != ""]
+            row = [row[0], row[1], row[-1].replace("#ORGBND", "")]
+            row[-1] = bond_types[row[-1]]
+            bonds.append(row)
+    
+    return bonds
+
+
 def reset_aromaticity(mol, idx):
 
     atom = mol.GetAtomWithIdx(idx)
@@ -233,8 +253,7 @@ def read_pdb_block(pdb, add_hs=True, remove_hs=False, proximity_bonding=False, s
         atom_names[atom_name.replace(" ","")] = i
 
     if params is not None:
-        bonds = parse_bonds(params)
-
+        bonds = parse_bonds_block(params)
         mol_editable = Chem.RWMol(mol)
 
         for bond in bonds:
@@ -261,7 +280,7 @@ def read_pdb_block(pdb, add_hs=True, remove_hs=False, proximity_bonding=False, s
         # print(i, mol.GetAtomWithIdx(i).GetPDBResidueInfo().GetName().strip())
         atom.UpdatePropertyCache()
 
-    mol.SetProp("_Name", filename.split("/")[-1].split(".")[0])
+    # mol.SetProp("_Name", filename.split("/")[-1].split(".")[0])
 
 
     return mol

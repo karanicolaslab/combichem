@@ -3,7 +3,7 @@ from utils.mcs import substucture_search
 from utils.rmsd import find_closest_mcs
 
 
-def get_charges(file):
+def get_charges(file_r):
     """Extract partial charges from params file
 
     Args:
@@ -12,9 +12,6 @@ def get_charges(file):
     Returns:
         dict: Dictionary of partial charges
     """
-    with open(file, "r") as file_r:
-        file_r = file_r.read().split("\n")
-
     charges_dict = {}
 
     for line in file_r:
@@ -26,7 +23,7 @@ def get_charges(file):
     return charges_dict
 
 
-def replace_charge(reference, target):
+def replace_charge(reference, ref_params, target, target_params):
     """Summary
 
     Args:
@@ -52,12 +49,9 @@ def replace_charge(reference, target):
 
     source_charges = get_charges(ref_params)
 
-    with open(target_params, "r") as file_r:
-        file_r = file_r.read().split("\n")
-
     pool = []
 
-    for line in file_r:
+    for line in target_params:
         if line[0:4] == "ATOM":
             line = line.split(" ")
             line = [elem for elem in line if elem != ""]
