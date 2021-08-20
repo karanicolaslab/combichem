@@ -41,7 +41,6 @@ def init(params=None, beta=True, mute=["protocols.simple_moves.SuperimposeMover"
     if beta:
         init_str += " -beta"
 
-
     pyrosetta.init(init_str)
 
 
@@ -197,7 +196,8 @@ def screening(pdb, output, lig_name="LG1", tolerance=0.000001, max_iter=2000, re
     """
 
 #     bound_pose = pose_from_pdb(pdb)
-    bound_pose = pose_from_pdbstring(pdb)
+    bound_pose = Pose()
+    pose_from_pdbstring(bound_pose, pdb)
     non_minimized_pose = bound_pose.clone()
 
     scorefxn = get_score_function()
